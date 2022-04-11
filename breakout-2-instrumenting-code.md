@@ -11,6 +11,7 @@ This workshop includes the editing of files in the WebTerminal you have been giv
 
 The Pico editor can be navigated using your keyboard cursor keys (as well as Page-Up and Page-Down to move pages), as well as some specific `Ctrl` key based shortcuts:
 
+* Paste: **Ctrl-V**
 * Save file: **Ctrl-O**
 * Quit: **Ctrl-X**
 * Cancel: **Ctrl-C**
