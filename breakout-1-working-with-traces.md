@@ -21,11 +21,9 @@ The Pico editor can be navigated using your keyboard cursor keys (as well as Pag
 
 In this breakout, you’re going to examine some traces being ingested into Grafana Cloud Traces, and learn how to find them and observe them.
 
-For this breakout, we’ll be using a common instance of Grafana Cloud and Grafana Cloud Logging and Grafana Cloud Tracing.
-
 We’ll be looking at the log and trace output from a small demonstration application maintained by Grafana Labs called The New Stack (or the TNS app). This is a simple microservice application consisting of a load balancer application that makes requests to an API microservice exposing several HTTP endpoints, which itself requests data from a third microservice hosting a database. The load balancer includes an automated tester which continually makes calls to the API.
 
-1. Log into your Grafana instance by going to the Grafana website and using the Common URL, login and password credentials you were sent. This is different to the Unique URL, although the username and password should be the same.
+1. Log into your Grafana instance by going to the Grafana website using URL, login and password credentials you were sent.
 
 2. You should see the welcome page. Go to the Explore menu by selecting the icon from the left-hand menubar:
 
