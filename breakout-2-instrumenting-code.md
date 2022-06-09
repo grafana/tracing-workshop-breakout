@@ -139,11 +139,11 @@ Again, don’t worry about any deletion errors on you might see, this is expecte
 
 This will build a new Docker image, upload it to the workshop registry and then deploy the application to Kubernetes using the new image.
 
-1.  Let’s take a look at the resulting output in Grafana. Log into your Grafana instance by going to the Grafana website and using the URL, login and password credentials you were sent. The application you’ve just deployed is sending log and tracing data to that Grafana Cloud instance.
+11.  Let’s take a look at the resulting output in Grafana. Log into your Grafana instance by going to the Grafana website and using the URL, login and password credentials you were sent. The application you’ve just deployed is sending log and tracing data to that Grafana Cloud instance.
 
 Very quickly, we’re going to test that we’re seeing logs and can use them to access traces referenced by trace ID.
 
-12. Select the Logs data source that you see (it’ll be named something like `grafanacloud-myorganisation-logs`):
+12. In the Explore view, Select the Logs data source that you see (it’ll be named something like `grafanacloud-myorganisation-logs`):
 
 ![Explorer Logs](images/image6.png)
 
