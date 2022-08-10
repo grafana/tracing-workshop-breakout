@@ -5,8 +5,8 @@
 
 * Linux shell knowledge
 * vim or Nano/Pico editor knowledge
-* Access to the build shell via [this link](https://wetty-tnsapril.work-shop.grafana.net/)
-  *    Username and password should have been pre-supplied
+* Access to the WebShell via the link you received in your workshop email
+  * Note: Username and password should have been pre-supplied
 
 This workshop includes the editing of files in the WebTerminal you have been given login details for. Both vim and pico have been included in the webterminal to allow you to carry out this editing. All of the examples in this breakout use `pico`, as it’s a simple to use editor, but feel free to use `vim` if you’re familiar with it.
 
