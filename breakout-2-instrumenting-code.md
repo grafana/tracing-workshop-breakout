@@ -21,11 +21,11 @@ The Pico editor can be navigated using your keyboard cursor keys (as well as Pag
 In this breakout, you’re going to instrument a small piece of JavaScript code to send traces to Grafana Cloud and then examine those traces.
 
 ---
-<span style="color:red">
-Important Note:
-</span>
+:bangbang: Important Note: :bangbang:
+
 This breakout relies on the correct modification of code. As with everything in life, nothing is guaranteed, and because of this there are finished copies of these files within your home directory in the web shell. Should you fail to see traces and logs in Grafana after making the code changes, run the following to rebuild the application with working code and deploy it:
 
+:sos: 
 ```bash
 ./golden-source-build.sh
 ```
