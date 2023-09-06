@@ -146,7 +146,7 @@ This breakout relies on the correct modification of code. As with everything in 
 
 12. In the Explore view, Select the Logs data source that you see (it’ll be named something like `grafanacloud-myorganisation-logs`).
 
-13. Use the log explorer to select all of the logs for the mythical-requester. First change from the query builder to the the LogQL parser. Do this by selecting `Code` from the right-hand side panel of the panel. You can do this either from `Log browser` dialogue and selecting the **requester** job, or by simply entering the following into the LogQL query line (‘Enter a Loki query’ edit field):
+13. Use the log explorer to select all of the logs for the mythical-requester. First change from the query builder to the the LogQL parser. Do this by selecting `Code` from the right-hand side panel of the panel. You can do this either from `Label browser` dialogue and selecting the **requester** job, or by simply entering the following into the LogQL query line (‘Enter a Loki query’ edit field):
     ```
     {job="requester"}
     ```

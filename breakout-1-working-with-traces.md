@@ -31,7 +31,7 @@ We’ll be looking at the log and trace output from a small demonstration applic
 
 3. Select the Logs data source that you see (it’ll be named something like `grafanacloud-someorg-logs`):
 
-4. First change from the query builder to the the LogQL parser. Do this by selecting `Code` from the right-hand  side of the panel. Now use the log explorer to select all of the logs for the `tns/tns-app` job.  You can do this either from `Log browser` dialogue and selecting the **requester** job, or by simply entering the following into the LogQL query line (`Enter a Loki query` edit field):
+4. First change from the query builder to the the LogQL parser. Do this by selecting `Code` from the right-hand  side of the panel. Now use the log explorer to select all of the logs for the `tns/tns-app` job. You can do this either from `Label browser` dialogue and selecting the **requester** job, or by simply entering the following into the LogQL query line (`Enter a Loki query` edit field):
 
    ```
    {job="tns/tns-app"} | logfmt |= "traceID"
@@ -71,15 +71,13 @@ We’ll be looking at the log and trace output from a small demonstration applic
 
 9. Going back to the Explore page, let’s look at another trace. This time, we’ll use the Tempo data source to search for traces directly. Select the Tempo data source, which will be named something like `grafanacloud-myorganisation-traces`. You’ll see a query dialogue. As mentioned earlier, we could enter a trace ID directly into the `TraceID` edit field to search for a specific trace, but there are a couple of other ways to do so.
 
-   `Loki Search` allows you to enter a LogQL query to search a set of logs with trace IDs. Select **Loki Search** and then enter:
+   `Loki Search` allows you to enter a LogQL query to search a set of logs with trace IDs. Select **Loki Search** and then run the following query:
 
    ```
    {job="tns/tns-app"} | logfmt |= "traceID"
    ```
 
-   into the `Log browser` edit field and run the query:
-
-   ![Explorer Trace Logs Search](images/image15.png)
+   ![Explorer Trace Logs Search](images/traces-loki-search.png)
 
    As you can see, the results are returned in a table format, with the trace ID as the second column, allowing you to easily select relevant traces. Selecting one will open a new tracing panel to the right hand side:
 
