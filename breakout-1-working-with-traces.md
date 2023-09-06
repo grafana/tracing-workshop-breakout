@@ -59,7 +59,7 @@ We’ll be looking at the log and trace output from a small demonstration applic
 
 7. To see how this is configured, go to the Data Source page by selecting the **Configuration** icon in the left-hand menu bar and selecting **Data sources**:
 
-   ![Data Sources Selector](images/image23.png)
+   ![Data Sources Selector](images/data-sources.png)
 
 8. Now select the Loki data source (it’ll be called something like `grafanacloud-someorg-logs` and to the left will be a Loki icon (![Loki Logo](images/image19.png)).
 
