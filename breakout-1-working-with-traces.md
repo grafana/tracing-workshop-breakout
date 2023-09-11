@@ -34,7 +34,7 @@ We’ll be looking at the log and trace output from a small demonstration applic
 4. First change from the query builder to the the LogQL parser. Do this by selecting `Code` from the right-hand  side of the panel. Now use the log explorer to select all of the logs for the `tns/tns-app` job. You can do this either from `Label browser` dialogue and selecting the **requester** job, or by simply entering the following into the LogQL query line (`Enter a Loki query` edit field):
 
    ```
-   {job="tns/tns-app"} | logfmt |= "traceID"
+   {job="tns/tns-app"} |= "traceID" | logfmt
    ```
 
    ![Explorer selector](images/image6.png)
