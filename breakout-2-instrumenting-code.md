@@ -25,7 +25,7 @@ In this breakout, you’re going to instrument a small piece of JavaScript code 
 
 This breakout relies on the correct modification of code. As with everything in life, nothing is guaranteed, and because of this there are finished copies of these files within your home directory in the web shell. Should you fail to see traces and logs in Grafana after making the code changes, run the following to rebuild the application with working code and deploy it:
 
-:sos: 
+:sos:
 ```bash
 ./golden-source-build.sh
 ```
@@ -36,7 +36,7 @@ This breakout relies on the correct modification of code. As with everything in 
     Your home directory includes a few things:
 
    * Manifests for deploying both applications and a Grafana Agent instance to a k8s cluster, as well as shell scripts to automate this for you.
-   * Source code for a small application that consists of a HTTP server that talks to a Postgres Database, as well as a service that makes HTTP GET/POST/DELETE requests to the HTTP server.
+   * Source code for a small application that consists of a HTTP server that talks to a Postgres Database, as well as a service that makes HTTP `GET`/`POST`/`DELETE` requests to the HTTP server.
 
    As mentioned in the workshop presentation, there are a couple of ways to instrument your source code to start receiving traces from them. The first is that of manually instrumenting code, where a developer decides what they want to trace, and which code to create spans for.
 
@@ -51,13 +51,13 @@ This breakout relies on the correct modification of code. As with everything in 
 
    In this source file you’ll see some code that:
 
-   * Requires some utility libraries (the first three lines) including a logging library that sends messages to Grafana Cloud Logging via the Grafana Agent.
+   * Includes (`require`s in NodeJS parlance) some utility libraries (the first three lines) including a logging library that sends messages to Grafana Cloud Logging via the Grafana Agent.
    * Defines the names of some mythical beasts.
    * Defines a `makeRequest` function that makes requests to the downstream HTTP server.
 
    This `makeRequest` function is called on a set of timers that reset themselves when it completes. We’re going to add tracing to this function.
 
-3. At the top of the source file, add:
+3. At the very top of the source file, add:
 
    ```javascript
    const tracingUtils = require('./tracing')();
@@ -79,17 +79,15 @@ This breakout relies on the correct modification of code. As with everything in 
    This will do a few things, in order of line:
 
    * Create a new span. As this is the first span we’ve declared, it’ll be the first span in a new trace.
-   * Sets a new tag attribute on the span, the `creature.type` tag, whose value will be the current value of the `beast` variable.
-   * Retrieve the trace ID of the span (the trace the span belongs to). As this is a new trace, a new trace ID will have been created.
+   * Sets a new span attribute on the span, the `creature.type` attribute, whose value will be the current value of the `beast` variable.
+   * Retrieve the trace ID of the span (the trace the span belongs to). As this is a new trace, a new trace ID will have been created with the span we're generating as the root span.
 
-5. Now that we have a new span, we need to create a context for it. The context will wrap the entirety of the rest of the function. Below the code you’ve just added, add the following:
+5. Now that we have a new span, we need to create a context for it. The context will wrap the entirety of the rest of the function, letting the instrumentation library know that any code executed in it belongs to the `requester` span. Below the code you’ve just added, add the following:
 
    ```javascript
        // Create a new context for this request
        api.context.with(api.trace.setSpan(api.context.active(), requestSpan), async () => {
    ```
-
-   This line creates a new trace context, and uses the span we just created to wrap the rest of the function.
 
 6. Under the lines you just added, copy and paste the following line:
 
@@ -98,7 +96,7 @@ This breakout relies on the correct modification of code. As with everything in 
            headers = propagator(requestSpan);
    ```
 
-   Remember that in the presentation, we said that to ensure that the trace can continue between services, we need to propagate the trace information to any downstream service. As we’ll want to continue the trace in the server, we use the propagation function defined in the tracing utilities to do this. The `propagator` function adds a new HTTP header to the headers we’ll send,  containing the trace information which the OpenTelemetry tracing collector in the downstream service will unpack to continue spans in the same trace.
+   Remember that in the workshop, we've learnt that to ensure that the trace can continue between services, we need to ***propagate*** the trace information from any service that makes a call to a downstream service. As we’ll want to continue the trace in the server, we use the propagation function defined in the tracing utilities to do this. The `propagator` function adds a new HTTP header to the headers we’ll send, containing the trace information (the trace ID and the current span ID) which the OpenTelemetry tracing collector in the downstream service will unpack to generate child spans of the passed span ID, continuing spans in the same trace.
 
 7. Now use the cursor down arrow or page down on your keyboard until you see the following (it is close to the bottom of the source file):
 
@@ -118,16 +116,16 @@ This breakout relies on the correct modification of code. As with everything in 
 
    This sets the error code for the span after the downstream server has either returned successfully or thrown an error. It then ends the span we created. Note that whilst this ends the span we created, it doesn’t necessarily end the trace, as there may be further operations occurring that also had a span associated with it.
 
-8. Finally, save the code you’ve just added by typing **Ctrl-O** and then quit Pico with **Ctrl-X**. If you don’t save, you’ll be first asked if you want to save the file if you just hit **Ctrl-X**.
+8. Finally, save the code you’ve just added (in Pico by typing **Ctrl-O**) and then quit the editor (again, in Pico with **Ctrl-X**.) If you don’t save, you’ll be first asked if you want to save the file if you just hit **Ctrl-X**.
 
-   Well done, you’ve just manually instrumented your first code! That wasn’t so hard!
+   Congratulations, you’ve just manually instrumented some code! That wasn’t so hard!
 
 9. Next, deploy the Grafana Agent:
    ```bash
    ./configure-agent-and-deploy.sh
    ```
 
-   This will allow our logs, metrics and traces to be sent to Grafana Cloud.
+   This will allow our logs, metrics and traces to be sent to Grafana Cloud via Grafana Alloy.
 
    **Note:** You may see an error like `Error from server (NotFound): error when deleting` on several lines when you run this for the first time. Don't worry about this, it's just because the agent isn't already running on the cluster.
 
@@ -138,50 +136,35 @@ This breakout relies on the correct modification of code. As with everything in 
 
     Again, don’t worry about any deletion errors on you might see, this is expected on a first run.
 
-    This will build a new Docker image, upload it to the workshop registry and then deploy the application to Kubernetes using the new image.
+    This will build a couple of new Docker images, upload it to the workshop registry and then deploy the application to Kubernetes using the new image.
 
-11.  Let’s take a look at the resulting output in Grafana. Log into your Grafana instance by going to the Grafana website and using the URL, login and password credentials you were sent. The application you’ve just deployed is sending log and tracing data to that Grafana Cloud instance.
+11. Let’s take a look at the resulting output in Grafana. Log into your Grafana instance by going to the Grafana website and using the URL, login and password credentials you were sent. The application you’ve just deployed is sending log and tracing data to that Grafana Cloud instance.
 
      Very quickly, we’re going to test that we’re seeing logs and can use them to access traces referenced by trace ID.
 
-12. In the Explore view, Select the Logs data source that you see (it’ll be named something like `grafanacloud-myorganisation-logs`).
+12. In the Explore page, select the Tempo data source (it'll be named something like `grafanacloud-someorg-traces`).
 
-13. Use the log explorer to select all of the logs for the mythical-requester. First change from the query builder to the the LogQL parser. Do this by selecting `Code` from the right-hand side panel of the panel. You can do this either from `Label browser` dialogue and selecting the **requester** job, or by simply entering the following into the LogQL query line (‘Enter a Loki query’ edit field):
+13. Ensure that the `TraceQL` query type is selected, and then enter the following into the query editor:
     ```
-    {job="requester"}
+    { resource.service.name = "mythical-requester" }
     ```
+    We're using TraceQL to find traces from the service we've just instrumented. If you remember some of the basics of TraceQL, this query will find any span whose `service.name` resource attribute is set to `mythical-requester`. Now run the query (either with ***Shift-Enter**,the **Run query** button or the **Show Logs** button). You should see several returned traces:
 
-    Now run the query (***Shift-Enter**,the **Run query** button or the **Show Logs** button). You’ll see a lot of logs that look like this:
+    ![TraceQL Results](images/image22.png)
 
-    ![Logs Panel](images/image22.png)
+14. Select one of the traces in the returned list, to open the trace in a right-hand panel:
 
-14. Now, as in the last breakout, expand one of the loglines with a trace ID to see the derived fields, and then select the blue pill button denoting a link to the a tracing panel:
+    ![TraceQL to Traces](images/image33.png)
 
-    ![Logs to Traces](images/image33.png)
-
-15. Select the first span in the trace, and expand the `Attributes` and `Resources` sections:
+15. Select the first span in the trace (`requester`), and expand the `Span Attributes` and `Resource Attributes` sections:
 
     ![Traces Panel](images/image12.png)
 
-    This span has a single resource attribute (`service.name`) which identifies the process the span was generated by (`mythical-requester`), and quite a few custom tag attributes. If you remember from the code, when we generated the top-level span for the requester, we added a `creature.type` tag which denoted the type of creature that was being requested. This is the first tag seen here. We could have added as many tags as we wanted. The other tags have been added by the OpenTelemetry instrumentation library.
+    This span has a single resource attribute (`service.name`) which identifies the process the span was generated by (`mythical-requester`), and quite a few custom span attributes. If you remember from the code, when we generated the top-level span for the requester, we added a `creature.type` span which denoted the type of creature that was being requested. This is the first span attribute seen here. We could have added as many attributess as we wanted. The other attributes have been added by the OpenTelemetry instrumentation library.
 
-16. By using the **Search** option in the tracing panel, you can search across trace spans from any 24 hour period in the retention period for traces in Grafana Cloud). Select this option and then use the dropdown on the ‘Service Name’ selector to select the `mythical-requester` service. This will search for all traces from this service, but you’ll see there are several other options including:
+    However, the traces we're seeing are completely self-contained within a single process. This is because we’ve only instrumented one of the two microservices that make up the entire service. Part of what we want to do is see the entire distributed trace for the service.
 
-    * A specific span name in the trace.
-    * Any attribute or resource values (such as status codes, error values, etc.).
-    * Minimum and maximum durations of a trace.
-
-    All of these options give you a lot of flexibility in filtering the traces you want to see.
-
-17. However, for now, select **Run query** at the top right of the page. You’ll see a set of trace results and selecting any of these results will open a new tracing panel to the right to let you examine the trace:
-
-    ![Span Search to Trace](images/image14.png)
-
-    So we now know how to quickly get from a log entry to a trace, as well as searching for recent trace spans directly from the tracing panel via span attributes. We’ve also discovered how a log source can be configured to allow shortcuts to traces, as well as the ability to search for traces via service names and associated data.
-
-    However, we’re only seeing traces that are completely self-contained within a single process. This is because we’ve only instrumented one of the two microservices that make up the entire service. Part of what we want to do is see the entire distributed trace for the service.
-
-18. Go back to the WebTerminal login you have (and keep the tab with Grafana open, we’ll come back to this). We’re going to add some auto-instrumentation to the downstream server, which will continue the trace we started in the requester.
+16. Go back to the WebTerminal login you have (and keep the tab with Grafana open, we’ll come back to this). We’re going to add some auto-instrumentation to the downstream server, which will continue the trace we started in the requester.
 
     Open the server code:
     ```bash
@@ -192,7 +175,7 @@ This breakout relies on the correct modification of code. As with everything in 
 
     This source file, as you might expect, is quite a bit longer than the requester code, as it’s a web server that:
 
-    * Accepts REST GET/POST/DELETE calls.
+    * Accepts REST `GET`/`POST`/`DELETE` calls.
     * Stores and retrieves data from the Postgres Database.
     * Outputs metrics based on requests made.
     * Defines several API endpoint functions.
@@ -201,62 +184,96 @@ This breakout relies on the correct modification of code. As with everything in 
 
     OK, take a deep breath first to get ready! Right, let’s instrument it!
 
-19.  At the very top of the source file, add the following line so it’s the first line in the file:
+17. At the very top of the source file, add the following line so it’s the first line in the file:
 
-     ```javascript
-     require('./tracing')();
-     ```
+    ```javascript
+    require('./tracing')();
+    ```
 
-20. Save the file with **Ctrl-O** and then exit Pico with **Ctrl-X**.
+18. Save the file (in Pico with **Ctrl-O**) and then exit the editor (in Pico with **Ctrl-X**).
 
     You’re done!
 
     The entire server code, including all imported files, has now been instrumented using OpenTelemetry’s default instrumentations for popular middlewares. Essentially by including it as the very first line, all following imported code can be injected with hooks that generate spans when this code is called.
 
-21. Redeploy the entire application with the following command:
+    In fact, this could have been even simpler, as NodeJS includes the ability to pass arguments to the binary, and this allows us to simply pass the OpenTelemetry tracing libraries as arguments with environment variables. But because we're also manually instrumenting a service, we're using the same shim library to auto-instrument the server.
+
+19. Redeploy the entire application with the following command:
     ```bash
     ./build-application-and-deploy.sh
     ```
 
-22. Once deployed, go back to the Grafana tab you had open in your browser. Go back to the Explorer and use the logs just as before (using the `{job="requester"}` LogQL query) to get a set of logs. Now, once again, select a log entry and then select the trace ID for it. You’ll see the trace open to the right, as before:
+    Wait for the code to be rebuilt and deployed to the underlying cluster.
 
-    ![Logs to Auto-instrumented Service](images/image20.png)
+20. Once redeployed, go back to the Grafana tab you had open in your browser. As both services are now instrumented (`mythical-requester` and the `mythical-server` service), we're giong to use a TraceQL query that takes advantage of that to find some very specific traces. Go back to the Explorer and enter the following TraceQL query into the query editor:
 
-    However, if you look closely at the trace you’ll see that there are now spans from two separate services.
+    ```
+    { span.db.statement =~ "^INSERT.*?manticore" && status = error } << { resource.service.name = "mythical-requester" } | select(span.creature.type)
+    ```
 
-    In the above screenshot, the spans generated from the requester are in green, whilst the spans generated from the server are in yellow. All of a sudden we can see an awful lot more in the trace, which is a huge shift in the amount of detail we can dig into to see where latencies occur.
+    This query is a bit more detailed (to say the least!) from the last TraceQL query we performed, so before we execute it, let's break it down a little:
+
+    ```
+    { span.db.statement =~ "^INSERT.*?manticore" && status = error }
+    ```
+    * Find spans that have a `db.statement` span attribute.
+    * The value of the `db.statement` attribute matches a regular expression, in this case that starts with `INSERT` and includes the text `manticore` somewhere in the string.
+    * The span has a status value of `error`.
+
+    ```
+    { span.db.statement =~ "^INSERT.*?manticore" && status = error } << { resource.service.name = "mythical-requester" }
+    ```
+    * Match the previous spans only if one of its ancestors is a span including the resource attribute `service.name` that has a value of `mythical-requester`. ie. that the span is occurs in downstream span from any span in `mythical-requester`.
+
+    ```
+    | select(span.creature.type)
+    ```
+    * For the returned spanset, select the `creature.type` span attribute as part of the query results, which will show the value in the span columns as well as the other selected values (the status and the service name).
+
+    Now knowing what we're searching for, run the query with ***Run query*** or ***Shift-Enter***. You'll see a list of results that match the TraceQL query. Expand one of the returned results so you can see the matching span selector fields:
+
+    ![TraceQL Query for Erroring Insert Calls](images/image20.png)
+
+    We see that the selected `creature.type` is `manticore` (which we would expect, given the value of `db.statement`!).
+
+21. Select one of the traces in the returned results, you'll see a trace like the following:
+
+    ![Auto-instrumented Spans Explanation](images/image25.png)
+
+    If you look closely at the trace you’ll see that there are now spans from two separate services, each denoted in different colours.
+
+    In the above screenshot, the spans generated from the requester are in pink, whilst the spans generated from the server are in purple. All of a sudden we can see an awful lot more in the trace, which is a huge shift in the amount of detail we can dig into to see where latencies occur.
 
     OpenTelemetry’s auto-instrumentation has found a lot of common middleware in the server, and then applied spans to entry points within these middlewares to generate spans that would be of interest to any developer that has to maintain and optimise the code. In short, it’s saved an awful lot of manual instrumentation effort that we might have had to carry out.
 
     Obviously, in a production service environment, there would be a lot of proprietary code that would also need instrumenting, but it’s easy to augment auto-instrumentation with manual instrumentation in much the same way we manually instrumented the requester.
 
-23. Remove the left-hand panel (the log panel), by selecting `Close` to expand the trace diagram panel. Let’s have a quick look at the spans in the trace.
+22. Remove the left-hand panel (the Tempo TraceQL panel), by selecting `Close` to expand the trace diagram panel. Let’s have a quick look at the spans in the trace.
 
     There are two services in the trace, the `mythical-requester` which makes requests to the server, and the `mythical-creatures` which receives these requests and then sends a response.
 
     For most traces, the length of the top-level `mythical-requester` span is actually shorter than the total trace, and several spans that continue to occur before the trace finishes.
 
-    But there are other spans here. Let’s break them down a bit.
+    You can see the critical path of the trace as the black bar that runs centrally through those spans as they carry out the critical work as part of the trace.
 
-    ![Auto-instrumented Spans Explanation](images/image25.png)
+23. This trace is interesting, because it shows an example of a trace where errors occurred (the exclamation mark in the red circle). We can see that the error propagates up from the span hierarchy from where it was actually thrown (and then ancestor spans also have an error set because the underlying error caused them to flag that a problem occurred).
 
-    We won’t get into this in too much detail, this is very much like the traces we saw being sent from the TNS application.
-
-    However, there are a few differences, namely the ‘Spans for service sending logs’ shows posts to the Loki logging backend (look for the `log_to_loki` spans), which is why the trace is longer than just the top-level span receiving a response, because these spans take longer to complete and are in progress when the response is received. Once they have finished sending their log data, the trace finishes.
-
-    It’s worth digging into another trace here, because there’s some extra information that we didn’t see in the TNS traces. A good span to look at is one of the Postgres database calls. Look for a span called `pg.query` and expand it, along with the `Attributes` section of the span (it’ll be slightly different depending on the call that’s made):
+    Open up the lowest span in the hierarchy with the error set (it will be the span named `pg.query:INSERT`) and expand its `Span Attributes` block. It will look similar to this:
 
     ![PG Detailed Explanation](images/image29.png)
 
-    The OpenTelemetry auto-instrumentation has given us probably as much detail as we’d need for the call to the Postgres database, including:
+    All of these spans have been auto-instrumented, and the library that makes a downstream call to the Postgres database, `pg`, has been instrumented by its authors. As such, it includes a large amount of contextual span attribute information to tell us what it's doing. We can see the connection string, the database name, the user, etc., but the interesting thing here is the `db.statement` attribute (which we used to find this trace in the first place).
 
-    * The connection string.
-    * The name of the database and user the server is accessing.
-    * The statement that’s being processed by Postgres (in this case value `INSERT`ion into a particular table).
-    * Network information on how the DB is referenced from the server.
+    This shows us that it was trying to carry out the following Postgres statement:
+    ```
+    INSERT INTO manticore(name) VALUES ($1)
+    ```
+    That in itself is fairly normal, there's a table called `manticore` and the call was to insert new data into it. However, this is a failing query. If you look at the top line of the span, including the `Service`, `Duration` and `Kind` intrinsics, you'll also se the `Status` and `Status message` fields. The `Status` is of `error` (again, how we found the trace), and the `Status message` is:
 
-    All of this allows us to quickly get a wealth of information required to determine why errors might be occurring, or where bottlenecks may lie (this DB could use some serious foreign key constraint work!).
+    ```
+    null value in column "name" of relation "manticore" violates not-null constraint
+    ```
 
-    Note that it isn’t instrumenting the Postgres database service itself, but it is showing the request being made to it and any errors that might be triggered in response. There are instrumentations for databases that also exist, which would give you spans from within Postgres as well.
+    If you know a bit about SQL databases, you'll immediately know that the code tried to set a value of `null` into a new row in the `manticore` table, where the Postgres database had been told a `null` value was illegal. As such, Postgres threw an error and we now know the reason for it. We could now go and fix the code to ensure we don't try and do this again, and shows the power of adding tracing as a signal to your applications!
 
 And that's the end of this breakout!
