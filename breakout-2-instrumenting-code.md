@@ -208,20 +208,20 @@ This breakout relies on the correct modification of code. As with everything in 
 20. Once redeployed, go back to the Grafana tab you had open in your browser. As both services are now instrumented (`mythical-requester` and the `mythical-server` service), we're giong to use a TraceQL query that takes advantage of that to find some very specific traces. Go back to the Explorer and enter the following TraceQL query into the query editor:
 
     ```
-    { span.db.statement =~ "^INSERT.*?manticore" && status = error } << { resource.service.name = "mythical-requester" } | select(span.creature.type)
+    { span.db.statement =~ "^INSERT.*?manticore.*" && status = error } << { resource.service.name = "mythical-requester" } | select(span.creature.type)
     ```
 
     This query is a bit more detailed (to say the least!) from the last TraceQL query we performed, so before we execute it, let's break it down a little:
 
     ```
-    { span.db.statement =~ "^INSERT.*?manticore" && status = error }
+    { span.db.statement =~ "^INSERT.*?manticore.*" && status = error }
     ```
     * Find spans that have a `db.statement` span attribute.
     * The value of the `db.statement` attribute matches a regular expression, in this case that starts with `INSERT` and includes the text `manticore` somewhere in the string.
     * The span has a status value of `error`.
 
     ```
-    { span.db.statement =~ "^INSERT.*?manticore" && status = error } << { resource.service.name = "mythical-requester" }
+    { span.db.statement =~ "^INSERT.*?manticore.*" && status = error } << { resource.service.name = "mythical-requester" }
     ```
     * Match the previous spans only if one of its ancestors is a span including the resource attribute `service.name` that has a value of `mythical-requester`. ie. that the span is occurs in downstream span from any span in `mythical-requester`.
 
