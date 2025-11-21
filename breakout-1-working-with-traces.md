@@ -57,7 +57,7 @@ We’ll be looking at the log and trace output from a small demonstration applic
 
    Once you’ve looked around the spans, let’s quickly look at how we could jump from the logs to the trace with the blue pill button. As part of the initialisation step in Grafana Cloud, the Grafana Cloud Logs are searched for the `traceID=<id>` string, and if this exists in a log line then Grafana makes an implicit link to the Grafana Cloud Tracing data source to search for that trace ID.
 
-7. To see how this is configured, go to the Data Source page by selecting the **Configuration** icon in the left-hand menu bar and selecting **Data sources**:
+7. To see how this is configured, go to the Data Source page by selecting the **Connections** icon in the left-hand menu bar and selecting **Data sources**:
 
    ![Data Sources Selector](images/data-sources.png)
 
