@@ -35,7 +35,7 @@ This breakout relies on the correct modification of code. As with everything in 
 
     Your home directory includes a few things:
 
-   * Manifests for deploying both applications and a Grafana Agent instance to a k8s cluster, as well as shell scripts to automate this for you.
+   * Manifests for deploying both applications and a Grafana Alloy instance to a k8s cluster, as well as shell scripts to automate this for you.
    * Source code for a small application that consists of a HTTP server that talks to a Postgres Database, as well as a service that makes HTTP `GET`/`POST`/`DELETE` requests to the HTTP server.
 
    As mentioned in the workshop presentation, there are a couple of ways to instrument your source code to start receiving traces from them. The first is that of manually instrumenting code, where a developer decides what they want to trace, and which code to create spans for.
@@ -51,7 +51,7 @@ This breakout relies on the correct modification of code. As with everything in 
 
    In this source file you’ll see some code that:
 
-   * Includes (`require`s in NodeJS parlance) some utility libraries (the first three lines) including a logging library that sends messages to Grafana Cloud Logging via the Grafana Agent.
+   * Includes (`require`s in NodeJS parlance) some utility libraries (the first three lines) including a logging library that sends messages to Grafana Cloud Logging via Grafana Alloy.
    * Defines the names of some mythical beasts.
    * Defines a `makeRequest` function that makes requests to the downstream HTTP server.
 
@@ -120,14 +120,14 @@ This breakout relies on the correct modification of code. As with everything in 
 
    Congratulations, you’ve just manually instrumented some code! That wasn’t so hard!
 
-9. Next, deploy the Grafana Agent:
+9. Next, deploy Grafana Alloy:
    ```bash
    ./configure-agent-and-deploy.sh
    ```
 
    This will allow our logs, metrics and traces to be sent to Grafana Cloud via Grafana Alloy.
 
-   **Note:** You may see an error like `Error from server (NotFound): error when deleting` on several lines when you run this for the first time. Don't worry about this, it's just because the agent isn't already running on the cluster.
+   **Note:** You may see an error like `Error from server (NotFound): error when deleting` on several lines when you run this for the first time. Don't worry about this, it's just because Alloy isn't already running on the cluster.
 
 10. Finally, we’re going to build and deploy the application we just changed using a small script. At the Webterminal prompt, run:
     ```bash
